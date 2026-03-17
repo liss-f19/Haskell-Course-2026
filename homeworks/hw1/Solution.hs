@@ -1,6 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
 import Data.Function
-import Distribution.Simple.Utils (xargs)
 
 -- from Basics/src/Tutorials01.hs
 isPrime :: Int -> Bool
