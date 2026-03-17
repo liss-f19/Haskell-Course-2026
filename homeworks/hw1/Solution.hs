@@ -1,5 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
 import Data.Function
-
+import Distribution.Simple.Utils (xargs)
 
 -- from Basics/src/Tutorials01.hs
 isPrime :: Int -> Bool
@@ -105,3 +106,31 @@ merge (x:xs) (y:ys)
 hamming :: [Integer]
 hamming = 1 : merge (map (2*) hamming)
                    (merge (map (3*) hamming) (map (5*) hamming))
+
+
+-- Task 7. bang patterns
+-- here ! enables not having chains of not evaluated things in accum
+power :: Int -> Int -> Int
+power b e = go e 1
+  where 
+    go 0 !acc = acc
+    go n !acc = go(n-1)(acc*b)
+
+
+-- Task 8. seq vs bang patterns
+listMaxSeq :: [Int] -> Int
+listMaxSeq [] = error "empty list"
+listMaxSeq (x:xs) = go xs x
+  where
+    go []     acc = acc
+    go (y:ys) acc = let acc' = max acc y
+                    in acc' `seq` go ys acc'
+
+
+listMaxBang :: [Int] -> Int
+listMaxBang []     = error "empty list"
+listMaxBang (x:xs) = go xs x
+  where
+    go []     !acc = acc
+    go (y:ys) !acc = go ys (max acc y)
+
