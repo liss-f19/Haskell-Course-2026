@@ -111,10 +111,12 @@ hamming = 1 : merge (map (2*) hamming)
 -- Task 7. bang patterns
 -- here ! enables not having chains of not evaluated things in accum
 power :: Int -> Int -> Int
-power b e = go e 1
+power b e
+  | e < 0     = error "power: negative exponent"
+  | otherwise = go e 1
   where 
     go 0 !acc = acc
-    go n !acc = go(n-1)(acc*b)
+    go n !acc = go (n-1) (acc * b)
 
 
 -- Task 8. seq vs bang patterns
