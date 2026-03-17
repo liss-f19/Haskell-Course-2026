@@ -1,6 +1,5 @@
 import Data.Function
-import Data.Time.Format.ISO8601 (yearFormat)
-import Data.List (permutations)
+
 
 -- from Basics/src/Tutorials01.hs
 isPrime :: Int -> Bool
@@ -91,3 +90,18 @@ permutationsCustom k xs =
   | x <- xs
   , ps <- permutationsCustom (k-1) (remove x xs)
   ]
+
+-- Task 6. Hamming Numbers
+-- a. Helper merge
+merge :: Ord a => [a] -> [a] -> [a]
+merge [] ys = ys
+merge xs [] = xs
+merge (x:xs) (y:ys)
+  | x < y     = x : merge xs (y:ys)
+  | x > y     = y : merge (x:xs) ys
+  | otherwise = x : merge xs ys  -- skip duplicate
+
+-- b.hamming infinite list
+hamming :: [Integer]
+hamming = 1 : merge (map (2*) hamming)
+                   (merge (map (3*) hamming) (map (5*) hamming))
