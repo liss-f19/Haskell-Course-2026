@@ -1,5 +1,3 @@
-{-# LANGUAGE TupleSections #-}
-
 import Control.Monad.State
 import qualified Data.Map as Map
 import Data.Map (Map)
