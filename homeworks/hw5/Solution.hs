@@ -195,7 +195,7 @@ movePlayer roll = do
     , energy = newEnergy
     }
 
-  return roll
+  return (newPos - currentPos)
 
 
 makeDecision :: [String] -> AdventureGame String
