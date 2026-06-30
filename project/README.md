@@ -18,8 +18,19 @@ stack test
 Run the executable against a source file:
 
 ```bash
-stack run mathlang-exe -- path/to/program.math
+stack run mathlang-exe -- examples/loss.math
 ```
+
+## Project Structure
+
+- `src/MathLang/AST.hs`: Core language syntax tree (programs, expressions, operators).
+- `src/MathLang/Parser.hs`: Megaparsec parser from source text to AST.
+- `src/MathLang/Eval.hs`: Evaluator for scalar/vector/matrix operations and errors.
+- `src/MathLang.hs`: Public module re-exporting main language API.
+- `src/Main.hs`: CLI entry point (`mathlang-exe`) that runs a program file.
+- `test/Spec.hs`: Hspec + QuickCheck tests (unittests, algebraic properties).
+- `examples/loss.math`: Sample MathLang program for quick execution.
+- `stack.yaml` / `package.yaml`: Build configuration and package metadata.
 
 ## Language Snapshot
 
