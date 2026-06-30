@@ -130,14 +130,24 @@ mulValue (Scalar a) (Matrix m) = Right (Matrix (map (map (a *)) m))
 mulValue (Matrix m) (Scalar a) = Right (Matrix (map (map (* a)) m))
 mulValue (Matrix a) (Vector v)
   | null a = Left (DimensionMismatch "cannot multiply empty matrix")
-  | length (head a) /= length v = Left (DimensionMismatch "matrix-vector multiplication dimension mismatch")
-  | otherwise = Right (Vector (map (sum . zipWith (*) v) a))
+  | any null a = Left (DimensionMismatch "matrix rows must be non-empty")
+  | otherwise =
+      case a of
+        [] -> Left (DimensionMismatch "cannot multiply empty matrix")
+        row0 : _
+          | length row0 /= length v -> Left (DimensionMismatch "matrix-vector multiplication dimension mismatch")
+          | otherwise -> Right (Vector (map (sum . zipWith (*) v) a))
 mulValue (Matrix a) (Matrix b)
   | null a || null b = Left (DimensionMismatch "cannot multiply empty matrices")
-  | length (head a) /= length b = Left (DimensionMismatch "matrix multiplication requires cols(A) == rows(B)")
+  | any null a || any null b = Left (DimensionMismatch "matrix rows must be non-empty")
   | otherwise =
-      let bt = transpose b
-       in Right (Matrix [[sum (zipWith (*) row col) | col <- bt] | row <- a])
+      case a of
+        [] -> Left (DimensionMismatch "cannot multiply empty matrices")
+        row0 : _
+          | length row0 /= length b -> Left (DimensionMismatch "matrix multiplication requires cols(A) == rows(B)")
+          | otherwise ->
+              let bt = transpose b
+               in Right (Matrix [[sum (zipWith (*) row col) | col <- bt] | row <- a])
 mulValue _ _ = Left (TypeError "unsupported operands for multiplication")
 
 divValue :: Value -> Value -> Either EvalError Value
@@ -173,13 +183,23 @@ ensureRectangular :: [[a]] -> Either EvalError ()
 ensureRectangular [] = Left (DimensionMismatch "matrix must have at least one row")
 ensureRectangular rows
   | any null rows = Left (DimensionMismatch "matrix rows must be non-empty")
-  | all ((== cols) . length) rows = Right ()
-  | otherwise = Left (DimensionMismatch "matrix rows must have equal length")
-  where
-    cols = length (head rows)
+  | otherwise =
+      case rows of
+        firstRow : rest
+          | all ((== length firstRow) . length) rest -> Right ()
+          | otherwise -> Left (DimensionMismatch "matrix rows must have equal length")
 
 transpose :: [[a]] -> [[a]]
 transpose [] = []
 transpose rows
   | any null rows = []
-  | otherwise = map head rows : transpose (map tail rows)
+  | otherwise =
+      case map uncons rows of
+        pairs ->
+          let heads = [h | Just (h, _) <- pairs]
+              tails = [t | Just (_, t) <- pairs]
+           in heads : transpose tails
+
+uncons :: [a] -> Maybe (a, [a])
+uncons [] = Nothing
+uncons (x : xs) = Just (x, xs)

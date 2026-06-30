@@ -2,7 +2,6 @@ module MathLang.Parser
   ( parseProgram
   ) where
 
-import Control.Monad (void)
 import Data.Functor (($>))
 import Data.Void (Void)
 import MathLang.AST
@@ -40,7 +39,7 @@ ident = lexeme . try $ do
     else pure name
 
 numberP :: Parser Expr
-numberP = ScalarLit <$> lexeme L.float
+numberP = ScalarLit <$> lexeme (try L.float <|> (fromIntegral <$> (L.decimal :: Parser Integer)))
 
 exprP :: Parser Expr
 exprP = try letExprP <|> additiveP
@@ -129,9 +128,9 @@ varDefP = do
 programP :: Parser Program
 programP = do
   sc
-  defs <- many (try (definitionP <* optional (symbol ";") <* sc))
+  defs <- many (try (definitionP <* optional (symbol ";")))
   expr <- exprP
-  optional (symbol ";")
+  _ <- optional (symbol ";")
   eof
   pure (Program defs expr)
 
