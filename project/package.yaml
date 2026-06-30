@@ -1,0 +1,36 @@
+default-extensions:
+- OverloadedStrings
+
+dependencies:
+- base >= 4.14 && < 5
+- containers
+- megaparsec
+- text
+
+library:
+  source-dirs: src
+  exposed-modules:
+  - MathLang
+  - MathLang.AST
+  - MathLang.Parser
+  - MathLang.Eval
+
+executables:
+  mathlang-exe:
+    main:                Main.hs
+    source-dirs:         src
+    ghc-options:
+    - -Wall
+    dependencies:
+    - mathlang
+
+tests:
+  mathlang-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -Wall
+    dependencies:
+    - mathlang
+    - hspec
+    - QuickCheck
