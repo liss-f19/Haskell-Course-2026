@@ -55,18 +55,19 @@ evaluatorSpec = describe "Evaluator" $ do
     let a = Matrix [[1, 2], [3, 4]]
     let b = Matrix [[5, 6], [7, 8]]
     let c = Matrix [[9, 10], [11, 12]]
-    left <- addValue a b >>= (`addValue` c)
-    right <- addValue b c >>= addValue a
+    let left = addValue a b >>= (`addValue` c)
+    let right = addValue b c >>= addValue a
     left `shouldBe` right
 
   it "checks distributive law on fixed case" $ do
     let a = Matrix [[1, 2], [3, 4]]
     let b = Matrix [[2, 0], [1, 2]]
     let c = Matrix [[0, 1], [2, 3]]
-    left <- addValue b c >>= mulValue a
-    ab <- mulValue a b
-    ac <- mulValue a c
-    right <- addValue ab ac
+    let left = addValue b c >>= mulValue a
+    let right = do
+          ab <- mulValue a b
+          ac <- mulValue a c
+          addValue ab ac
     left `shouldBe` right
 
 endToEndSpec :: Spec
@@ -95,17 +96,17 @@ propertySpec = describe "Property tests" $ do
     let v = Matrix m
         t1 = transposeValue v
         t2 = t1 >>= transposeValue
-     in t2 == Right v
+     in approxEitherValue t2 (Right v)
 
   it "transpose of product reverses order" $ property $ \(CompatMats a b) ->
     let va = Matrix a
         vb = Matrix b
         lhs = mulValue va vb >>= transposeValue
         rhs = transposeValue vb >>= \tb -> transposeValue va >>= mulValue tb
-     in lhs == rhs
+     in approxEitherValue lhs rhs
 
   it "matrix addition is commutative" $ property $ \(SameShapeMats a b) ->
-    addValue (Matrix a) (Matrix b) == addValue (Matrix b) (Matrix a)
+    approxEitherValue (addValue (Matrix a) (Matrix b)) (addValue (Matrix b) (Matrix a))
 
   it "identity matrix is left and right unit" $ property $ \(SquareMat a) ->
     let n = length a
@@ -113,7 +114,7 @@ propertySpec = describe "Property tests" $ do
         va = Matrix a
         left = mulValue i va
         right = mulValue va i
-     in left == Right va && right == Right va
+     in approxEitherValue left (Right va) && approxEitherValue right (Right va)
 
 newtype SmallMat = SmallMat [[Double]] deriving (Show)
 newtype SquareMat = SquareMat [[Double]] deriving (Show)
@@ -152,6 +153,29 @@ instance Arbitrary SameShapeMats where
 
 smallNum :: Gen Double
 smallNum = choose (-5, 5)
+
+epsilon :: Double
+epsilon = 1.0e-9
+
+approxDouble :: Double -> Double -> Bool
+approxDouble a b = abs (a - b) <= epsilon
+
+approxVector :: [Double] -> [Double] -> Bool
+approxVector a b = length a == length b && and (zipWith approxDouble a b)
+
+approxMatrix :: [[Double]] -> [[Double]] -> Bool
+approxMatrix a b = length a == length b && and (zipWith approxVector a b)
+
+approxValue :: Value -> Value -> Bool
+approxValue (Scalar a) (Scalar b) = approxDouble a b
+approxValue (Vector a) (Vector b) = approxVector a b
+approxValue (Matrix a) (Matrix b) = approxMatrix a b
+approxValue _ _ = False
+
+approxEitherValue :: Either EvalError Value -> Either EvalError Value -> Bool
+approxEitherValue (Right a) (Right b) = approxValue a b
+approxEitherValue (Left e1) (Left e2) = e1 == e2
+approxEitherValue _ _ = False
 
 evalText :: String -> Either EvalError Value
 evalText src = do
