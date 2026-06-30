@@ -1,0 +1,8 @@
+def loss(X, y, theta) =
+  let preds = X * theta in
+  let errors = preds - y in
+  (1 / 2) * dot(errors, errors)
+
+loss([[1,2],[1,3],[1,4]], [2,3.5,4.8], [0,0])
+
+
