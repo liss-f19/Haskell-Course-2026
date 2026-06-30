@@ -1,11 +1,12 @@
-cabal-version: 1.12
+cabal-version: 2.2
 
 -- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
-name:           project
-version:        0.0.0
+name:           mathlang
+version:        0.1.0.0
+license:        BSD-3-Clause
 build-type:     Simple
 
 library
@@ -16,7 +17,9 @@ library
       MathLang.Eval
   other-modules:
       Main
-      Paths_project
+      Paths_mathlang
+  autogen-modules:
+      Paths_mathlang
   hs-source-dirs:
       src
   default-extensions:
@@ -24,6 +27,7 @@ library
   build-depends:
       base >=4.14 && <5
     , containers
+    , directory
     , megaparsec
     , text
   default-language: Haskell2010
@@ -35,7 +39,9 @@ executable mathlang-exe
       MathLang.AST
       MathLang.Eval
       MathLang.Parser
-      Paths_project
+      Paths_mathlang
+  autogen-modules:
+      Paths_mathlang
   hs-source-dirs:
       src
   default-extensions:
@@ -44,6 +50,7 @@ executable mathlang-exe
   build-depends:
       base >=4.14 && <5
     , containers
+    , directory
     , mathlang
     , megaparsec
     , text
@@ -53,7 +60,9 @@ test-suite mathlang-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_project
+      Paths_mathlang
+  autogen-modules:
+      Paths_mathlang
   hs-source-dirs:
       test
   default-extensions:
@@ -63,6 +72,7 @@ test-suite mathlang-test
       QuickCheck
     , base >=4.14 && <5
     , containers
+    , directory
     , hspec
     , mathlang
     , megaparsec

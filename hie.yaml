@@ -1,0 +1,10 @@
+cradle:
+  stack:
+    - path: "./project/src"
+      component: "mathlang:lib"
+
+    - path: "./project/src/Main.hs"
+      component: "mathlang:exe:mathlang-exe"
+
+    - path: "./project/test"
+      component: "mathlang:test:mathlang-test"
